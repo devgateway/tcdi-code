@@ -15,8 +15,8 @@ SA_smoking_prevalence.r
 * Creates prevalence tables
 
 #### Required packages
-* svy
-
+* svy - estimates standard errors for survey data
+* haven - loads stata data (default data format for NIDS)
 
 
 
@@ -27,5 +27,5 @@ SA_smoking_prevalence.r
 * Creates variables used for analysis
 * Creates prevalence tables
 
-#### Notes
+#### Programming notes
 Users should update file paths in order to run this code on their machines.
