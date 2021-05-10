@@ -18,7 +18,7 @@ library(tidyverse)
 library(haven)
 library(survey)
 
-setwd("/Users/kathryn/Documents/Development Gateway/SouthAfrica/Analysis/Data/Input/NIDS")
+setwd("TCID/SouthAfrica/Analysis")
 
 
 #### Create data for analysis ####
@@ -113,20 +113,7 @@ df <- df %>%
 svyd <- svydesign(id =~ cluster, weights = ~w5_wgt, data = df, strata = ~w5_dc2001, nest=TRUE)
 
 
-# Calculate the proportions and confidence intervals
-
-# svyby = a survey funtion that will estimate by groups
-# ~I(smoke) = the main variable we will estimating the proportions of 
-# ~age_grp = the group variable
-# design = specify the variable the had the survey design
-# svyciprop = the main function in this ceommand = calculated the propotions and confidence intervals
-#              for survey data(
-# vartype = Indicate the the confidence intervals should be displayed
-# method = choose the method for estimating condfidence intervals. In this case
-#         logit is chosen because we are estimating proportions between 0 - 1
- 
-
-
+# Calculate the prevalence rates and confidence intervals
 age_grp_res <- svyby(~I(smoke),~age_grp, design=svyd, svyciprop, vartype="ci", method="logit")
 gender_res <- svyby(~I(smoke),~gender, design=svyd, svyciprop, vartype="ci", method="logit")
 education_res <- svyby(~I(smoke),~education, design=svyd, svyciprop, vartype="ci", method="logit")
@@ -139,5 +126,4 @@ gender_res
 education_res
 urban_rural_res
 total_res
-
 
