@@ -10,22 +10,19 @@ Notes:
 
 * Set globals ------------------------------------------------------------------
 
-
-
 global dg "TCDI/SouthAfrica/Analysis"		// file path
 global DataIN "$dg/Data/Input/NIDS"			// Input data
 global DataOUT "$dg/Data/Output"			// Output data
 global VersionIN "W5_Anon_V1.0.0"			// NIDS wave
-global DO "$dg/Code"
+global DO "$dg/Code"						// Code
 global output "$dg/Output" 					// Outputs                                                  
 
 
+* Import data ---------------------------------------------------------------
 
+// NIDS has several datasets that should be merged to form the analysis dataset
 
-* A. Import data ---------------------------------------------------------------
-
-
-*A. Open data
+* Open data
 use "$DataIN/Adult_$VersionIN.dta", clear
 gen dataset= "Adult" 
 
@@ -37,25 +34,26 @@ drop if pid == .
 merge 1:1 pid using "$DataIN/Link_File_W5_Anon_V1.0.0.dta"
 drop _merge
 
-
-
-
-*checking for size of top-up sample
-tab sample,m 
-
 merge 1:1 w5_hhid pid using "$DataIN/indderived_$VersionIN.dta"
 
 
-
-* Only keep adults
-keep if dataset == "Adult"
+* Drop unnecessary observations and variables. 
 
 * Drop survey non respondents
 keep if w5_a_outcome == 1
 
+* Only keep adults
+keep if dataset == "Adult"
+
+* Drop respondent who were not asked about smoking
+drop if w5_a_hllfsmk<=-3 
+drop if w5_a_hllfsmk==.
+
+* Drop if gender data is missing
+drop if w5_best_gen < 0
 
 
-* Only keep necesary variables -------------------------------------------------
+* Only keep necesary variables
 #d;	
 	keep w5_hhid w5_a_popgrp w5_a_lvbfdc_2011 w5_a_bhali3 pid w5_a_popgrp_o 
 		w5_a_lvbfcc w5_a_bhdod_y3 w5_best_age_yrs w5_a_parhpid w5_a_bhbrth 
@@ -86,17 +84,7 @@ keep if w5_a_outcome == 1
 
 
 
-* all aged 14 and below (from hhderived data) were not asked about smoking.
-drop if w5_a_hllfsmk<=-3 
-drop if w5_a_hllfsmk==.
-
-
-
-
-
-** B. Create variables ---------------------------------------------------------
-
-
+** Create variables ---------------------------------------------------------
 
 * Age groups
 gen age_grp =1 if w5_best_age_yrs>=15 & w5_best_age_yrs<18
@@ -108,7 +96,7 @@ label val age_grp  age_grp
 
 
 
-*educcation
+* Education
  
 gen ed = .
 replace ed = 1 if w5_best_edu == 0 | w5_best_edu == 25 /*no school*/
@@ -138,7 +126,7 @@ label val ed ed
 
 
 
-*Smoking prevalence by geo-type
+* Geography type
 
 gen byte urban =1 if w5_geo2011==2 &w5_geo2011!=. &w5_geo2011!=-3 &w5_geo2011!=-5
 replace urban =0 if w5_geo2011!=2 &w5_geo2011!=-3 &w5_geo2011!=-5 &w5_geo2011!=.
@@ -147,11 +135,7 @@ label define urban 1 "1. urban" 0 "0. rural", replace
 label values urban urban
 tab urban,m
 
-
-
-
-
-* Reanme variables
+* Rename variables
 ren w5_best_age_yrs age 
 ren w5_best_race race 
 ren w5_best_gen gender
@@ -161,24 +145,6 @@ ren w5_a_hllfsmk smoke
 ren pid person_identifier
 ren w5_geo2011 rural_urban
 ren w5_dc2001 strata
-
-* Recode gender variable
-gen gender_code=1 if gender==1
-replace gender_code =2 if gender==2
-replace gender_code=-9 if gender==-9
-
-
-
-*race and poverty with Indian and White in one pop group
-gen race2=.
-replace race2=1 if race==1 & race!=-9
-replace race2=2 if race==2 & race!=-9
-replace race2= 3 if race>=3 & race!=-9 
-
-label define race2 1 "1. African" 2 "2. Coloured" 3. "3. Asian_Indian_White", replace
-label values race2 race2
-tab race2,m
-
 
 
 * Recode Smoke so that Yes = 1 No = 0
@@ -240,7 +206,8 @@ lab var urban
 
 *label val educ_highest_tertiary educ_current_level educ_highest_school_grade highest_education
 numlabel, remove
-ddd
+
+
 preserve 
 	keep person_identifier rural_urban survey_weight smoke age race gender highest_education educ_highest_school_grade educ_current_level  
 
@@ -271,10 +238,5 @@ order person_identifier survey_weight smoke_code  rural urban age_grp age_grp_18
 	
 restore
 
-	
-	
-	
-	
-	
 	
 	
