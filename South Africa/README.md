@@ -8,12 +8,24 @@ We use 2017 National Income Dynamics Study Wave 5 data. This is a nationally rep
 
 ## Code
 ### R
+#### Description
+SA_smoking_prevalence.r
+* Loads NIDS Data
+* Creates variables used for analysis
+* Creates prevalence tables
+
 #### Required packages
 * svy
 
 
-### Stata
-Users should update file paths in order to run this code on their machines.
 
-## License
-The code is made available under the [MIT license]("https://opensource.org/licenses/mit-license.php").
+
+### Stata
+#### Description
+SA_smoking_prevalence.r
+* Loads NIDS Data
+* Creates variables used for analysis
+* Creates prevalence tables
+
+#### Notes
+Users should update file paths in order to run this code on their machines.
