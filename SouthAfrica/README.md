@@ -4,7 +4,7 @@ This folder contains code that was used to calculate smoking prevalence rates fo
 
 
 ### Data
-We use 2017 National Income Dynamics Study Wave 5 data. This is a nationally representative sample of South Africans and include questions about smoking, age, gender, highest education, race and location that are used to calculate prevalence rates. The data are available for download from [DataFirst]("https://www.datafirst.uct.ac.za/dataportal/index.php/catalog/712").  
+We use 2017 National Income Dynamics Study Wave 5 data. This is a nationally representative sample of South Africans and include questions about smoking, age, gender, highest education, race and location that are used to calculate prevalence rates. The data are available for download from [DataFirst](https://www.datafirst.uct.ac.za/dataportal/index.php/catalog/712).  
 Both the Stata dofile and R script assume that the NIDS data has been downloaded.
 
 ### Code
