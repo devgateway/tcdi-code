@@ -2,7 +2,7 @@
 
 ## TCDI
 The Tobacco control Data Initiative (TCDI) aims to create user-friendly tobacco control online dashboards that respond to the needs of the tobacco control community which includes government stakeholders, civil society organisations, and academia in African countries. As countries are added, links to their websites will be added below. 
-* [South Africa](https://tobaccocontroldata.org/southafrica)
+* [South Africa](https://southafrica.tobaccocontroldata.org)
 * Nigeria (forthcoming)
 * Kenya (forthcoming)
 
