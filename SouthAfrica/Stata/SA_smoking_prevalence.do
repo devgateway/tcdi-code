@@ -10,8 +10,8 @@ Notes:
 
 * Set globals ------------------------------------------------------------------
 
-global dg "TCDI/SouthAfrica/Analysis"		// file path
-global DataIN "$dg/Data/Input/NIDS"			// Input data
+global dg "tcdi-code/SouthAfrica"		// file path
+global DataIN "$dg/Data"			// Input data
 global DataOUT "$dg/Data/Output"			// Output data
 global VersionIN "W5_Anon_V1.0.0"			// NIDS wave
 global DO "$dg/Code"						// Code
@@ -86,157 +86,113 @@ drop if w5_best_gen < 0
 
 ** Create variables ---------------------------------------------------------
 
-* Age groups
-gen age_grp =1 if w5_best_age_yrs>=15 & w5_best_age_yrs<18
-replace age_grp =2 if w5_best_age_yrs>=18 & w5_best_age_yrs<25
-replace age_grp =3 if w5_best_age_yrs>=25 & w5_best_age_yrs<55
-replace age_grp =4 if w5_best_age_yrs>=55 & w5_best_age_yrs!=.
-label def age_grp  1 "15-17" 2 "18-24" 3 "25-54" 4 "55+"
-label val age_grp  age_grp
+* Age categories
+gen age_cat = .
+replace age_cat = 1 if w5_best_age_yrs >= 15 & w5_best_age_yrs < 18
+replace age_cat = 2 if w5_best_age_yrs >= 18 & w5_best_age_yrs < 25
+replace age_cat = 3 if w5_best_age_yrs >= 25 & w5_best_age_yrs < 55
+replace age_cat = 4 if w5_best_age_yrs >= 55 & w5_best_age_yrs !=.
+
+lab var age_cat "Age"
+label def age_cat  1 "15-17" 2 "18-24" 3 "25-54" 4 "55+"
+label val age_cat  age_cat
 
 
-
-* Education
- 
-gen ed = .
-replace ed = 1 if w5_best_edu == 0 | w5_best_edu == 25 /*no school*/
+* Education categories
+gen education_cat = .
+// no schooling 
+replace education_cat = 1 if w5_best_edu == 0 | w5_best_edu == 25
 
 // primary school
-replace ed = 2 if w5_best_edu>=1 & w5_best_edu<=7
-replace ed = 2 if (w5_best_edu==16 |  w5_best_edu==18 ) & (w5_a_edschgrd>=1 & w5_a_edschgrd<=7)
+replace education_cat = 2 if w5_best_edu>=1 & w5_best_edu<=7
+replace education_cat = 2 if (w5_best_edu==16 |  w5_best_edu==18 ) & (w5_a_edschgrd>=1 & w5_a_edschgrd<=7)
 
 // incompl secondary school
-replace ed = 3 if w5_best_edu>=8 & w5_best_edu<=11
-replace ed = 3 if (w5_best_edu==16 |  w5_best_edu==18 ) & (w5_a_edschgrd>=8 & w5_a_edschgrd<=11)
-replace ed = 3 if inlist(w5_best_edu, 14, 27, 28, 30, 31)
-replace ed = 3 if (w5_best_edu==16 |  w5_best_edu==18 ) & inlist( w5_a_edschgrd, 14, 27, 28, 30, 31)
+replace education_cat = 3 if w5_best_edu>=8 & w5_best_edu<=11
+replace education_cat = 3 if (w5_best_edu==16 |  w5_best_edu==18 ) & (w5_a_edschgrd>=8 & w5_a_edschgrd<=11)
+replace education_cat = 3 if inlist(w5_best_edu, 14, 27, 28, 30, 31)
+replace education_cat = 3 if (w5_best_edu==16 |  w5_best_edu==18 ) & inlist( w5_a_edschgrd, 14, 27, 28, 30, 31)
 
 // matric
-replace ed = 4 if (w5_best_edu==16|w5_best_edu==18) & (w5_a_edschgrd==12)
-replace ed = 4 if inlist(w5_best_edu, 12, 15, 29, 32)
+replace education_cat = 4 if (w5_best_edu==16|w5_best_edu==18) & (w5_a_edschgrd==12)
+replace education_cat = 4 if inlist(w5_best_edu, 12, 15, 29, 32)
 
 // post secondary school
-replace ed = 5 if inlist(w5_best_edu, 17, 19, 20, 21, 22, 23) 
+replace education_cat = 5 if inlist(w5_best_edu, 17, 19, 20, 21, 22, 23) 
 
 // still in education
-replace ed = 6 if w5_a_ed17curlev!=.
+replace education_cat = 6 if w5_a_ed17curlev!=.
 
-label def ed 1 "Gr 0 or less" 2 "G1-G7" 3 "G8-G11" 4 "G12" 5 "Post-matric" 6 "Still in educ"
-label val ed ed 
-
-
+lab var education_cat "Education"
+label def education_cat 1 "Gr 0 or less" 2 "G1-G7" 3 "G8-G11" 4 "G12" 5 "Post-matric" 6 "Still in educ"
+label val education_cat education_cat 
 
 * Geography type
-
-gen byte urban =1 if w5_geo2011==2 &w5_geo2011!=. &w5_geo2011!=-3 &w5_geo2011!=-5
-replace urban =0 if w5_geo2011!=2 &w5_geo2011!=-3 &w5_geo2011!=-5 &w5_geo2011!=.
-
+gen urban = .
+replace urban = 1 if w5_geo2011 == 2
+replace urban = 0 if w5_geo2011 == 1 | w5_geo2011 == 3
+lab var urban "Geography type"
 label define urban 1 "1. urban" 0 "0. rural", replace
 label values urban urban
-tab urban,m
-
-* Rename variables
-ren w5_best_age_yrs age 
-ren w5_best_race race 
-ren w5_best_gen gender
-ren w5_best_edu highest_education
-ren w5_wgt survey_weight
-ren w5_a_hllfsmk smoke
-ren pid person_identifier
-ren w5_geo2011 rural_urban
-ren w5_dc2001 strata
 
 
-* Recode Smoke so that Yes = 1 No = 0
+* Smoking Status
+gen smoke = w5_a_hllfsmk
 replace smoke = 0 if smoke == 2
+
+lab var smoke "Smoke"
 lab define smoke 0 "0. No" 1 "1. Yes"
 label values smoke smoke
 
-svyset cluster [w=survey_weight], strata(strata) 
-rename ed education_categories
-*save "$temp/Adult.dta", replace
+* Race
+clonevar race = w5_best_race
+replace race = . if race <=0
 
-* Export micro data ***********************************************************
+lab var race "Race"
 
+clonevar gender = w5_best_gen
+
+lab var gender "Gender"
+
+* Rename variables
+ren w5_wgt survey_weight
+ren pid person_identifier
+ren w5_dc2001 strata
 
 
 * Keep data used in analysis
-keep if age >= 15
+keep if age_cat != .
 keep if gender > 0
-keep age_grp person_identifier smoke	rural_urban	urban survey_weight		///
-	gender race race2	education_cat	 w5_a_edterlev w5_a_ed17curlev 		///
-	w5_a_edschgrd highest_education age cluster strata
+keep	person_identifier survey_weight cluster strata					///
+		smoke urban gender race education_cat age_cat	
+	   
+
+* Analysis ---------------------------------------------------------------------	   
+	   
+* Set survey design
+svyset cluster [w=survey_weight], strata(strata) 
 
 
+* Create prevalence tables for each category
 
-tab education_cat, gen(educ)
-rename educ1 educ_no_schooling
-rename educ2 educ_primary_school
-rename educ3 educ_incmp_seconary_school
-rename educ4 educ_matric
-rename educ5 educ_post_secondary
-rename educ6 educ_inschool
+svy: tab smoke, ci
 
-tab age_grp, gen(age_grp)
-
-rename age_grp1 age_grp_18_24
-rename age_grp2 age_grp_25_54
-rename age_grp3 age_grp_55plus
-
-gen male = 1 if gender == 1 & gender > 0 
-gen female = 1 if gender == 2
-
-gen smoke_code = smoke ==1
-
-gen rural = urban == 0
-
-gen african = race == 1 if race > 0
-gen coloured = race == 2 if race > 0
-gen asian_indian = race == 3 if race > 0 
-gen white = race == 4 if race > 0 
-gen asian_indian_white = race == 3 | race == 4 if race > 0 
+foreach var in urban gender race education_cat age_cat {
+	svy: tab `var' smoke, row ci
+}
 
 
-replace race = . if race <=0
+* Create Prevalence tables by gender
 
-rename w5_a_edterlev educ_highest_tertiary
-rename w5_a_ed17curlev educ_current_level
-rename w5_a_edschgrd educ_highest_school_grade
-lab var urban
+foreach var in urban race education_cat age_cat {
+	di "Smoking prevalence for men"	
+	svy: tab `var' smoke if gender == 1, row ci
+	di "Smoking prevalence for women"	
+	svy: tab `var' smoke if gender == 2, row ci
 
-*label val educ_highest_tertiary educ_current_level educ_highest_school_grade highest_education
-numlabel, remove
-
-
-preserve 
-	keep person_identifier rural_urban survey_weight smoke age race gender highest_education educ_highest_school_grade educ_current_level  
-
-	 
-	order person_identifier rural_urban survey_weight smoke age race gender highest_education educ_highest_school_grade educ_current_level  
-
-	*order highest_educ educ_highest_tertiary educ_current_level educ_highest_school_grade age, last
-
-
-	export  excel "$DataOUT/DG_smoking_prevalence_TCDI_micro_data.xlsx", replace firstrow(var)
-restore
-
-preserve
-
-keep person_identifier survey_weight smoke_code  rural urban age_grp age_grp_18_24 ///
-	age_grp_25_54 age_grp_55plus african coloured asian_indian_white male female	///
-	education_categories educ_no_schooling educ_primary_school 					///
-	educ_incmp_seconary_school educ_matric educ_post_secondary educ_inschool
 	
-	
-order person_identifier survey_weight smoke_code  rural urban age_grp age_grp_18_24 ///
-	age_grp_25_54 age_grp_55plus african coloured asian_indian_white male female	///
-	education_categories educ_no_schooling educ_primary_school 					///
-	educ_incmp_seconary_school educ_matric educ_post_secondary educ_inschool
-	
-	
-	export  excel "$DataOUT/DG_smoking_prevalence_NIDS_created_vars.xlsx", replace firstrow(var)
-	
-restore
+}
+
 
 	
 	
